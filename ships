@@ -1,0 +1,63 @@
+from random import choice
+field = [["*" for i in range(10)] for i in range(10)]
+lett = {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "H": 8, "I": 9, "J": 10}
+letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+ships = []
+x = [i for i in range(10)]
+y = [i for i in range(10)]
+def print_field():
+    print("  ", end="")
+    for i in letters:
+        print(i, end=" ")
+    print()
+    print("  - - - - - - - - - -")
+    for j in range(10):
+        print(j, end="")
+        print("|", end="")
+        for i in range(10):
+            print(field[j][i], end="")
+            print(" ", end="")
+        print()
+def check_ship(ship, ship_list):
+    for ship_l in ship_list:
+        for part_cords in ship_l:
+            for cords_2 in ship: 
+                if cords_2[0] in [part_cords[0] + 1, part_cords[0], part_cords[0] - 1] and cords_2[1] in [part_cords[1] + 1, part_cords[1], part_cords[1] - 1]:
+                    return False
+    return True
+def create_ships():
+    global ships 
+    lengths = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
+    for length in lengths:
+        ship_gened = False
+        generator_counter = 0
+        while not ship_gened:
+            x_ship = choice(x)
+            y_ship = choice(y)
+            # право: 0 вниз: 1 влево: 2 вверх: 4
+            point = choice([0, 1])
+            if ((x_ship  + length) < 10 and point == 0) or ((y_ship  + length) < 10 and point == 1):
+                ship = list([x_ship  + (point == 0) * i, y_ship  + (point == 1) * i] for i in range(length))
+                if check_ship(ship, ships):
+                    ships.append(ship)
+                    ship_gened = True
+                else:
+                    ship_gened = False
+                    generator_counter += 1
+            else:
+                ship_gened = False
+                generator_counter += 1
+            if generator_counter == 70:
+                generator_counter = 0
+                ships = []
+def fire(shooting_at = [], shooted_into = []):
+    if shooting_at:
+        if len(shooted_into) <= 1:
+            
+            while 
+        else:
+
+            
+print_field()
+create_ships()
+print(ships)
