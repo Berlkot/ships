@@ -5,11 +5,13 @@ field_plr2 = [["*" for _ in range(10)] for _ in range(10)]
 buffer_field = [["*" for _ in range(10)] for _ in range(10)]
 lett = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7, "I": 8, "J": 9}
 letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
-ori = {"право": 0, "низ": 1}
+ori = {"право": 0, "низ": 1, "0": 0, "1": 1}
 plr2_ships = []  # может быть пк
 plr1_ships = []  # точно игрок
 plr1_can_shoot = []
 plr2_can_shoot = []
+plr1_name = ""
+plr2_name = ""
 all_players = 1
 x = [i for i in range(10)]
 y = [i for i in range(10)]
@@ -39,6 +41,8 @@ def new_game():
     plr1_ships = []  # точно игрок
     plr1_can_shoot = []
     plr2_can_shoot = []
+    plr1_name = ""
+    plr2_name = ""
     all_players = 1
     for x2 in x:
         for y2 in y:
@@ -70,7 +74,7 @@ def check_ship(ship, ship_list):
                     return False
     return True
 
-
+# право: 0 вниз: 1 влево: 2 вверх: 3
 def create_ships():
     global plr2_ships
     ships = plr2_ships
@@ -81,7 +85,6 @@ def create_ships():
         while not ship_genned:
             x_ship = choice(x)
             y_ship = choice(y)
-            # право: 0 вниз: 1 влево: 2 вверх: 3
             point = choice([0, 1])
             if ((x_ship + length - 1) < 10 and point == 0) or ((y_ship + length - 1) < 10 and point == 1):
                 ship = list([x_ship + (point == 0) * i, y_ship + (point == 1) * i] for i in range(length))
@@ -275,7 +278,7 @@ def plr_delete_ship(cords, pl_num):
 def plr_set_ships(pl_num):
     ships_to_place = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
     while ships_to_place:
-        print("Доступные длинны кораблей:", ships_to_place)
+        print("Доступные длины кораблей:", ships_to_place)
         command = input("\"добавить\" или \"удалить\" корабль?(1/0): ")
         if command == "добавить" or command == "1":
             try:
@@ -286,12 +289,12 @@ def plr_set_ships(pl_num):
                 if counter == len(ships_to_place):
                     length = ships_to_place[0]
                 else:
-                    length = int(input("Введите длинну корабля, который хотите поставить: "))
+                    length = int(input("Введите длину корабля, который хотите поставить: "))
                     if length not in ships_to_place:
                         print("Нет корабля с заданной длинной!")
                         continue
                 if length != 1:
-                    orientation = input("Введите ориентацию корабля(право, низ): ")
+                    orientation = input("Введите ориентацию корабля(право, низ)/(0, 1): ")
                 else:
                     orientation = "право"
                 if orientation not in ori:
@@ -401,8 +404,8 @@ def print_fields(is_bot):
         str1 = "Ваше поле:"
         str2 = "Поле компьютера:"
     else:
-        str1 = "Поле первого игрока:"
-        str2 = "Поле второго игрока:"
+        str1 = f"Поле игрока {plr1_name}:"
+        str2 = f"Поле игрока {plr2_name}:"
     print("-----------------------------")
     print(str1)
     print_field(field_plr1)
@@ -413,7 +416,9 @@ def print_fields(is_bot):
 
 
 def main_loop():
-    global all_players
+    global all_players,\
+        plr1_name,\
+        plr2_name
     flag = True
     while flag:
         try:
@@ -457,40 +462,46 @@ def main_loop():
                     break
         else:
             print("Новая игра с другим игроком")
+            plr1_name = input("Введите имя первого игрока: ")
+            if plr1_name == "":
+                plr1_name == "1"
+            plr2_name = input("Введите имя второго игрока: ")
+            if plr1_name == "":
+                plr1_name == "2"
             print("Фаза создания кораблей")
-            print("Очередь первого игрока")
+            print(f"Очередь игрока {plr1_name}")
             input("Нажмите Enter если готовы")
             print_field(field_plr1)
             plr_set_ships(1)
-            print("Игрок 1 успешно поставил все корабли")
+            print(f"Игрок {plr1_name} успешно поставил все корабли")
             print("\n" * 50)
-            print("Очередь второго игрока")
+            print(f"Очередь игрока {plr2_name}")
             input("Нажмите Enter если готовы")
             print_field(field_plr2)
             plr_set_ships(2)
-            print("Игрок 2 успешно поставил все корабли")
+            print(f"Игрок {plr2_name} успешно поставил все корабли")
             print("\n" * 50)
             print("Фаза игры")
             print_fields(False)
-            print("Ход игрока 1")
+            print(f"Ход игрока {plr1_name}")
             mem_pl1 = plr_fire(1)
             print_fields(False)
-            print("Ход игрока 2")
+            print(f"Ход игрока {plr2_name}")
             mem_pl2 = plr_fire(2)
             while True:
                 print_fields(False)
-                print("Ход игрока 1")
+                print(f"Ход игрока {plr1_name}")
                 mem_pl1 = plr_fire(1, mem_pl1)
                 if not plr2_ships:
                     print_fields(False)
-                    print("Игрок 1 победили!")
+                    print(f"Игрок {plr1_name} победили!")
                     break
-                print("Ход игрока 2")
                 print_fields(False)
+                print(f"Ход игрока {plr2_name}")
                 mem_pl2 = plr_fire(2, mem_pl2)
                 if not plr1_ships:
                     print_fields(False)
-                    print("Игрок 2 победил!")
+                    print(f"Игрок {plr2_name} победил!")
                     break
         wp = input("Сыграть ещё раз?[Y/N]")
         if wp == "Y":
