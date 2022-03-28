@@ -298,7 +298,7 @@ def plr_set_ships(pl_num):
                     print("Введена неправильная ориентация!")
                     continue
                 cords = input("Введите координаты корабля: ")
-                if cords[0] not in lett or cords[1] not in list(map(str, y)):
+                if cords[0] not in lett or cords[1] not in list(map(str, y)) or cords == "":
                     print("Введены неправильные координаты")
                     continue
                 cords = [cords[0], int(cords[1])]
@@ -354,11 +354,11 @@ def plr_fire(player, shooted_at=None):
         field = field_plr1
     while not missed:
         cords = input("Введите координаты для стрельбы: ")
-        if cords[0] not in lett or cords[1] not in list(map(str, y)):
+        if cords[0] not in lett or cords[1] not in list(map(str, y)) or cords == "":
             print("Введены неправильные координаты")
             continue
         cords = [lett[cords[0]], int(cords[1])]
-        if cords not in can_shoot:
+        elif cords not in can_shoot:
             print("Координата уже занята")
             continue
         else:
