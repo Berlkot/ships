@@ -358,7 +358,7 @@ def plr_fire(player, shooted_at=None):
             print("Введены неправильные координаты")
             continue
         cords = [lett[cords[0]], int(cords[1])]
-        elif cords not in can_shoot:
+        if cords not in can_shoot:
             print("Координата уже занята")
             continue
         else:
