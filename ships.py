@@ -301,9 +301,12 @@ def plr_set_ships(pl_num):
                     print("Введена неправильная ориентация!")
                     continue
                 cords = input("Введите координаты корабля или q, чтобы отменить: ")
-                while cords != "q" or cords == "" or cords[0] not in lett or cords[1] not in list(map(str, y)):
+                while cords != "q" and (cords == "" or cords[0] not in lett or cords[1] not in list(map(str, y))):
                     print("Введены неправильные координаты")
                     cords = input("Введите координаты корабля или q, чтобы отменить: ")
+                if cords == "q":
+                    print("Постановка была отменена")
+                    continue
                 cords = [cords[0], int(cords[1])]
 
                 place_state, field = plr_set_ship(length, orientation, cords, pl_num)
