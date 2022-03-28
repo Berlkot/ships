@@ -276,8 +276,8 @@ def plr_set_ships(pl_num):
     ships_to_place = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
     while ships_to_place:
         print("Доступные длинны кораблей:", ships_to_place)
-        command = input("\"добавить\" или \"удалить\" корабль?: ")
-        if command == "добавить":
+        command = input("\"добавить\" или \"удалить\" корабль?(1/0): ")
+        if command == "добавить" or command == "1":
             try:
                 counter = 0
                 for leng in ships_to_place:
@@ -314,7 +314,7 @@ def plr_set_ships(pl_num):
             except:
                 print("Ошибка ввода, попробуйте ещё раз")
                 continue
-        elif command == "удалить":
+        elif command == "удалить" or command == "0":
             if len(get_form_pl(pl_num)[0]) == 0:
                 print("Нечего удалять")
                 continue
