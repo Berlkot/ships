@@ -447,6 +447,7 @@ def main_loop():
             mem_pl = plr_fire(1)
             print_fields(True)
             print("Ход компьютера")
+            input("Нажмите Enter для продолжения")
             mem_pc = pc_turn()
             while True:
                 print_fields(True)
@@ -458,6 +459,7 @@ def main_loop():
                     break
                 print_fields(True)
                 print("Ход компьютера")
+                input("Нажмите Enter для продолжения")
                 mem_pc = pc_turn(mem_pc[0], mem_pc[1])
                 if not plr1_ships:
                     print_fields(True)
