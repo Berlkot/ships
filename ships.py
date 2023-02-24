@@ -41,8 +41,6 @@ def new_game():
     plr1_ships = []  # точно игрок
     plr1_can_shoot = []
     plr2_can_shoot = []
-    plr1_name = ""
-    plr2_name = ""
     all_players = 1
     for x2 in x:
         for y2 in y:
@@ -74,6 +72,7 @@ def check_ship(ship, ship_list):
                     return False
     return True
 
+
 # право: 0 вниз: 1 влево: 2 вверх: 3
 def create_ships():
     global plr2_ships
@@ -103,10 +102,9 @@ def create_ships():
 
 
 def check_pointers(nums, cords, can_shoot):
-    if nums:
-        pointer = choice(nums)
-    else:
+    if not nums:
         return None
+    pointer = choice(nums)
     if pointer == 0:
         cords_point = [cords[0] + 1, cords[1]]
     elif pointer == 1:
@@ -118,8 +116,7 @@ def check_pointers(nums, cords, can_shoot):
     if cords_point not in can_shoot:
         nums.remove(pointer)
         return check_pointers(nums, cords, can_shoot)
-    else:
-        return cords_point
+    return cords_point
 
 
 def is_ship(cords, ship_list):
@@ -135,34 +132,25 @@ def write_to_field(cords, field, letter, can_shoot=None):
     field[cords[0]][cords[1]] = letter
     if can_shoot is not None and cords in can_shoot:
         can_shoot.remove(cords)
-    else:
-        pass
 
 
 def write_ship_to_field(ship, field, can_shoot):
+    x_length = ship[-1][0] - ship[0][0] + 1
     field_to_write = []
-    for cords in ship:
-        spec_cord = [[cords[0] - 1, cords[1]],
-                     [cords[0] - 1, cords[1] - 1],
-                     [cords[0], cords[1] - 1],
-                     [cords[0] + 1, cords[1] - 1],
-                     [cords[0] + 1, cords[1]],
-                     [cords[0] + 1, cords[1] + 1],
-                     [cords[0], cords[1] + 1],
-                     [cords[0] - 1, cords[1] + 1],
-                     [cords[0], cords[1]]]
-        for cord in spec_cord:
-            if cord not in field_to_write:
-                field_to_write.append(cord)
+    for x in range(-1, len(ship)+1):
+        for y in range(-1, 2):
+            if x_length == len(ship):
+                field_to_write.append([ship[0][0] + x, ship[0][1] + y])
+            else:
+                field_to_write.append([ship[0][0] + y, ship[0][1] + x])
     for cords in field_to_write:
-        if cords in ship and cords in can_shoot:
-            field[cords[0]][cords[1]] = "@"
-        elif cords in can_shoot:
-            field[cords[0]][cords[1]] = "#"
-        else:
+        if cords not in can_shoot:
             continue
-        if cords in can_shoot:
-            can_shoot.remove(cords)
+        if cords in ship:
+            field[cords[0]][cords[1]] = "@"
+        else:
+            field[cords[0]][cords[1]] = "#"
+        can_shoot.remove(cords)
 
 
 def fire(shooting_at, shooted_into, shoot_cords, ships_list):
@@ -173,9 +161,7 @@ def fire(shooting_at, shooted_into, shoot_cords, ships_list):
     if fire_state:
         print("Нашёл часть корабля")
         write_to_field(shoot_cords, field, "@", plr2_can_shoot)
-        if shooting_at:
-            pass
-        else:
+        if not shooting_at:
             shooting_at = fire_state
         shooted_into.append(shoot_cords)
         shooted_into.sort()
@@ -186,12 +172,10 @@ def fire(shooting_at, shooted_into, shoot_cords, ships_list):
             shooting_at = []
             shooted_into = []
             return False, shooting_at, shooted_into
-        else:
-            return False, shooting_at, shooted_into
-    else:
-        print("Оу, я промазал")
-        write_to_field(shoot_cords, field, "#", plr2_can_shoot)
-        return True, shooting_at, shooted_into
+        return False, shooting_at, shooted_into
+    print("Оу, я промазал")
+    write_to_field(shoot_cords, field, "#", plr2_can_shoot)
+    return True, shooting_at, shooted_into
 
 
 def pc_turn(shooting_at=None, shooted_into=None):
@@ -203,27 +187,23 @@ def pc_turn(shooting_at=None, shooted_into=None):
     ships = plr1_ships
     missed = False
     while not missed:
-        if shooting_at:
-            if len(shooted_into) == 1:
-                choice_array = [0, 1, 2, 3]
-                shoot_cords = check_pointers(choice_array, shooted_into[0], plr2_can_shoot)
-                missed, shooting_at, shooted_into = fire(shooting_at, shooted_into, shoot_cords, ships)
-            else:
-                if shooted_into[0][0] == shooted_into[1][0] - 1:
-                    choice_array = [check_pointers([2], shooted_into[0], plr2_can_shoot),
-                                    check_pointers([0], shooted_into[-1], plr2_can_shoot)]
-                else:
-                    choice_array = [check_pointers([3], shooted_into[0], plr2_can_shoot),
-                                    check_pointers([1], shooted_into[-1], plr2_can_shoot)]
-                if None in choice_array:
-                    choice_array.remove(None)
-                shoot_cords = choice(choice_array)
-                missed, shooting_at, shooted_into = fire(shooting_at, shooted_into, shoot_cords, ships)
-        else:
-            shoot_cords = choice(plr2_can_shoot)
-            missed, shooting_at, shooted_into = fire(shooting_at, shooted_into, shoot_cords, ships)
         if not ships:
             break
+        if not shooted_into:
+            shoot_cords = choice(plr2_can_shoot)
+        elif len(shooted_into) == 1:
+            choice_array = [0, 1, 2, 3]
+            shoot_cords = check_pointers(choice_array, shooted_into[0], plr2_can_shoot)
+        elif shooted_into[0][0] == shooted_into[1][0] - 1:
+            shoot_cords = [check_pointers([2], shooted_into[0], plr2_can_shoot),
+                           check_pointers([0], shooted_into[-1], plr2_can_shoot)]
+        else:
+            shoot_cords = [check_pointers([3], shooted_into[0], plr2_can_shoot),
+                           check_pointers([1], shooted_into[-1], plr2_can_shoot)]
+        if None in shoot_cords:
+            shoot_cords.remove(None)
+            shoot_cords = choice(shoot_cords)
+        missed, shooting_at, shooted_into = fire(shooting_at, shooted_into, shoot_cords, ships)
     return shooting_at, shooted_into
 
 
@@ -243,100 +223,85 @@ def plr_set_ship(length, orientation, cords, player_num):
             (int(cords[1]) + length - 1) < 10 and ori[orientation] == 1):
         ship = list([lett[cords[0]] + (ori[orientation] == 0) * i, int(cords[1]) + (ori[orientation] == 1) * i] for i in range(length))
         ships, field = get_form_pl(player_num)
-        if check_ship(ship, ships):
-            ships.append(ship)
-        else:
+        if not check_ship(ship, ships):
             return False, None
-        if all_players == 1:
-            for cords in ship:
-                write_to_field(cords, field, "X")
-            return True, field
-        else:
+        ships.append(ship)
+        if all_players != 1:
             for cords in ship:
                 write_to_field(cords, buffer_field, "X")
             return True, buffer_field
-    else:
-        return False, None
+        for cords in ship:
+            write_to_field(cords, field, "X")
+        return True, field
+    return False, None
 
 
 def plr_delete_ship(cords, pl_num):
     ships, field = get_form_pl(pl_num)
-    if all_players == 1:
-        pass
-    else:
+    if all_players != 1:
         field = buffer_field
     ship_to_delete = is_ship(cords, ships)
-    if ship_to_delete:
-        ships.remove(ship_to_delete)
-        for cords in ship_to_delete:
-            write_to_field(cords, field, "*")
-        return True, len(ship_to_delete), field
-    else:
+    if not ship_to_delete:
         return False, None, field
+    ships.remove(ship_to_delete)
+    for cords in ship_to_delete:
+        write_to_field(cords, field, "*")
+    return True, len(ship_to_delete), field
 
 
 def plr_set_ships(pl_num):
-    ships_to_place = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
+    ships_to_place = ["4", "3", "3", "2", "2", "2", "1", "1", "1", "1"]
     while ships_to_place:
-        print("Доступные длины кораблей:", ships_to_place)
+        print("Доступные длины кораблей:", ", ".join(ships_to_place))
         command = input("\"добавить\" или \"удалить\" корабль?(1/0): ")
         if command == "добавить" or command == "1":
-            try:
-                counter = 0
-                for leng in ships_to_place:
-                    if ships_to_place[0] == leng:
-                        counter += 1
-                if counter == len(ships_to_place):
-                    length = ships_to_place[0]
-                else:
-                    length = int(input("Введите длину корабля, который хотите поставить: "))
-                    if length not in ships_to_place:
-                        print("Нет корабля с заданной длинной!")
-                        continue
-                if length != 1:
-                    orientation = input("Введите ориентацию корабля(право, низ)/(0, 1): ")
-                else:
-                    orientation = "право"
-                if orientation not in ori:
-                    print("Введена неправильная ориентация!")
-                    continue
-                cords = input("Введите координаты корабля или q, чтобы отменить: ")
-                while cords != "q" and (cords == "" or cords[0] not in lett or cords[1] not in list(map(str, y))):
-                    print("Введены неправильные координаты")
-                    cords = input("Введите координаты корабля или q, чтобы отменить: ")
-                if cords == "q":
-                    print("Постановка была отменена")
-                    continue
-                cords = [cords[0], int(cords[1])]
-
-                place_state, field = plr_set_ship(length, orientation, cords, pl_num)
-                if place_state:
-                    ships_to_place.remove(length)
-                    print("Вы успешно поставили корабль")
-                    print_field(field)
-                else:
-                    print("Постановка корабля не удалась, попробуйте ещё раз")
-                    continue
-            except:
-                print("Ошибка ввода, попробуйте ещё раз")
+            if len(set(ships_to_place)) == 1:
+                length = ships_to_place[0]
+            else:
+                length = input("Введите длину корабля, который хотите поставить: ")
+            if length not in ships_to_place:
+                print("Нет корабля с заданной длинной!")
                 continue
+            length = int(length)
+            if length != 1:
+                orientation = input("Введите ориентацию корабля(право, низ)/(0, 1): ")
+            else:
+                orientation = "право"
+            if orientation not in ori:
+                print("Введена неправильная ориентация!")
+                continue
+            cords = input("Введите координаты корабля или q, чтобы отменить: ")
+            while cords != "q" and (len(cords) < 2 or cords[0] not in lett or cords[1] not in list(map(str, y))):
+                print("Введены неправильные координаты")
+                cords = input("Введите координаты корабля или q, чтобы отменить: ")
+            if cords == "q":
+                print("Постановка была отменена")
+                continue
+            cords = [cords[0], int(cords[1])]
+            place_state, field = plr_set_ship(length, orientation, cords, pl_num)
+            if not place_state:
+                print("Постановка корабля не удалась, попробуйте ещё раз")
+                continue
+            ships_to_place.remove(str(length))
+            print("Вы успешно поставили корабль")
+            print_field(field)
         elif command == "удалить" or command == "0":
             if len(get_form_pl(pl_num)[0]) == 0:
                 print("Нечего удалять")
                 continue
             cords = input("Введите координаты корабля: ")
-            if cords == "" or cords[0] not in lett or cords[1] not in list(map(str, y)):
+            if len(cords) < 2 or cords[0] not in lett or cords[1] not in list(map(str, y)):
                 print("Введены неправильные координаты")
                 continue
             cords = [lett[cords[0]], int(cords[1])]
             delete_state, deleted_len, field = plr_delete_ship(cords, pl_num)
-            if delete_state:
-                ships_to_place.append(deleted_len)
-                ships_to_place.sort(reverse=True)
-                print("Корабль успешно удалён")
-                print_field(field)
-            else:
+            if not delete_state:
                 print("Корабль не найден")
+                continue
+            ships_to_place.append(deleted_len)
+            ships_to_place.sort(reverse=True)
+            print("Корабль успешно удалён")
+            print_field(field)
         else:
             print("Неизвестная команда")
     clear_buffer()
@@ -360,46 +325,44 @@ def plr_fire(player, shooted_at=None):
         field = field_plr1
     while not missed:
         cords = input("Введите координаты для стрельбы: ")
-        if cords == "" or cords[0] not in lett or cords[1] not in list(map(str, y)):
+        if len(cords) < 2 or cords[0] not in lett or cords[1] not in list(map(str, y)):
             print("Введены неправильные координаты")
             continue
         cords = [lett[cords[0]], int(cords[1])]
         if cords not in can_shoot:
             print("Координата уже занята")
             continue
-        else:
-            fire_state = is_ship(cords, ships_list)
-            if fire_state:
-                shooted_at_ship = None
-                for ship in shooted_at:
-                    fl = 0
-                    for cords1 in ship:
-                        if cords1 in fire_state:
-                            ship.append(cords)
-                            ship.sort()
-                            shooted_at_ship = ship
-                            fl = 1
-                            break
-                    if fl == 1:
-                        break
-                if not shooted_at_ship:
-                    shooted_at.append([cords])
-                    shooted_at_ship = [cords]
-                print("Попадание")
-                if shooted_at_ship == fire_state:
-                    ships_list.remove(shooted_at_ship)
-                    write_ship_to_field(shooted_at_ship, field, can_shoot)
-                    print("Корабль уничтожен")
-                    shooted_at.remove(shooted_at_ship)
-                else:
-                    write_to_field(cords, field, "@")
-                if not ships_list:
+        fire_state = is_ship(cords, ships_list)
+        if not fire_state:
+            print("Промах")
+            write_to_field(cords, field, "#", can_shoot)
+            return shooted_at
+        shooted_at_ship = None
+        for ship in shooted_at:
+            fl = 0
+            for cords1 in ship:
+                if cords1 in fire_state:
+                    ship.append(cords)
+                    ship.sort()
+                    shooted_at_ship = ship
+                    fl = 1
                     break
-                print_fields(is_pc)
-            else:
-                print("Промах")
-                write_to_field(cords, field, "#", can_shoot)
-                return shooted_at
+            if fl == 1:
+                break
+        if not shooted_at_ship:
+            shooted_at.append([cords])
+            shooted_at_ship = [cords]
+        print("Попадание")
+        if shooted_at_ship == fire_state:
+            ships_list.remove(shooted_at_ship)
+            write_ship_to_field(shooted_at_ship, field, can_shoot)
+            print("Корабль уничтожен")
+            shooted_at.remove(shooted_at_ship)
+        else:
+            write_to_field(cords, field, "@")
+        if not ships_list:
+            break
+        print_fields(is_pc)
 
 
 def print_fields(is_bot):
@@ -515,4 +478,5 @@ def main_loop():
             flag = False
 
 
-main_loop()
+if __name__ == "__main__":
+    main_loop()
